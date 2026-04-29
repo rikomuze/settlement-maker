@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>推し活精算メーカー</title>
+  <meta name="description" content="ライブ遠征やグッズ代の立て替え精算をかんたんにまとめられるツールです。" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow">LIVE DAY SETTLEMENT</p>
+      <h1>推し活精算メーカー</h1>
+<p class="lead">
+  チケット代・グッズ代・ホテル代など、誰が誰にいくら払えばいいかを自動で整理します。
+</p>
+
+<div class="mini-guide">
+  <p class="mini-guide-title">使い方</p>
+  <p>
+    参加メンバーと支払い内容を入れるだけで、精算結果と内訳をまとめられます。
+  </p>
+  <p>
+    <strong>均等割り：</strong>チケット代やホテル代など、対象者で同じ金額を割るときに使います。<br>
+    <strong>各自の金額を入力：</strong>グッズ代のように、人によって金額が違うときに使います。
+  </p>
+</div>
+
+
+    </header>
+
+    <section class="card">
+      <h2>1. 参加メンバー</h2>
+      <p class="hint">一緒に参戦・精算する人を追加してください。</p>
+
+      <div class="input-row">
+        <input id="memberName" type="text" placeholder="例：わたし / Aちゃん" />
+        <button id="addMemberBtn" type="button">追加</button>
+      </div>
+
+      <ul id="memberList" class="member-list"></ul>
+    </section>
+
+    <section class="card">
+      <h2>2. 支払いを追加</h2>
+      <p class="hint">
+        支払った人・金額・対象者を入れると、均等割りで計算します。
+      </p>
+
+      <label>
+  項目
+  <select id="itemName">
+    <option value="チケット代">チケット代</option>
+    <option value="アップグレード代">アップグレード代</option>
+    <option value="グッズ代">グッズ代</option>
+    <option value="交通費">交通費</option>
+    <option value="ホテル代">ホテル代</option>
+    <option value="タクシー代">タクシー代</option>
+    <option value="ロッカー代">ロッカー代</option>
+    <option value="カフェ・ごはん代">カフェ・ごはん代</option>
+    <option value="送料">送料</option>
+    <option value="その他">その他</option>
+  </select>
+</label>
+<label id="customItemNameWrap" class="hidden">
+  その他の項目名
+  <input id="customItemName" type="text" placeholder="例：代行費 / 梱包材費 / 夕食代" />
+</label>
+
+      <label>
+        金額
+        <input id="itemAmount" type="number" inputmode="numeric" placeholder="例：48000" />
+      </label>
+
+      <label>
+        支払った人
+        <select id="payerSelect"></select>
+      </label>
+
+      <div class="split-mode-area">
+  <p class="label-title">割り方</p>
+
+  <label class="radio-label">
+    <input type="radio" name="splitMode" value="equal" checked />
+    <span>均等割り</span>
+  </label>
+
+  <label class="radio-label">
+    <input type="radio" name="splitMode" value="individual" />
+    <span><span>各自の金額を入力</span></span>
+  </label>
+</div>
+
+<div id="equalTargetArea" class="target-area">
+  <p class="label-title">対象者</p>
+  <div id="targetCheckboxes" class="checkbox-group"></div>
+</div>
+
+<div id="individualAmountArea" class="individual-area hidden">
+  <p class="label-title">各自の金額</p>
+  <p class="hint">対象者ごとの金額を入力してください。</p>
+  <div id="individualAmountInputs" class="individual-inputs"></div>
+</div>
+
+<button id="addPaymentBtn" class="primary" type="button">支払いを追加</button>
+    
+
+      <div class="payment-list-wrap">
+        <h3>追加した支払い</h3>
+        <ul id="paymentList" class="payment-list"></ul>
+      </div>
+    </section>
+
+    <section class="card result-card">
+      <h2>3. 精算結果</h2>
+      <p class="hint">最小に近い送金回数で表示します。</p>
+
+      <div id="resultBox" class="result-box empty">
+        まだ精算結果はありません。
+      </div>
+
+      <button id="copyBtn" class="primary" type="button">精算内容をコピー</button>
+      <button id="downloadImageBtn" class="primary" type="button">結果を画像で保存</button>
+      <button id="resetBtn" class="secondary" type="button">すべてリセット</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
