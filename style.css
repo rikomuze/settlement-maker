@@ -408,3 +408,46 @@ button:active{transform:scale(.98)}
 .result-line{font-size:17px;font-weight:800;padding:15px 12px;background:#f9eff8;border-radius:13px;margin:9px 0;border:0;overflow-wrap:anywhere}
 .breakdown-block{background:#f8f7fc;border:0;border-radius:15px}
 @media(max-width:520px){.app{width:calc(100% - 24px)}.hero{padding-top:22px}.card{padding:19px 16px}.input-row{grid-template-columns:minmax(0,1fr) auto}.input-row button{width:auto;padding-inline:20px}.checkbox-group{grid-template-columns:repeat(2,minmax(0,1fr))}.individual-row{grid-template-columns:1fr}.mini-guide{padding:15px}}
+
+/* MUZE TOOL BOX sibling theme: ticket counter + receipt */
+@import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+:root{--bg:#f1ebe1;--card:#fffdf8;--text:#40382f;--muted:#85796c;--line:#dcd1c3;--accent:#735b50;--accent-light:#f3e8e2;--danger:#ae586c;--shadow:none}
+body{font-family:"Zen Kaku Gothic New","Hiragino Sans",sans-serif;background:radial-gradient(rgba(64,56,47,.055) 1px,transparent 1px) 0 0/22px 22px,#f1ebe1;color:var(--text)}
+.tool-nav{max-width:760px;margin:16px auto 0;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}
+.tool-nav a{font-family:"Klee One",cursive;font-weight:600;border-bottom:1px dashed #87786b}
+.tool-nav span{font-size:10px;letter-spacing:.14em;color:#96897c}
+.app{max-width:760px;padding-top:8px}
+.hero{position:relative;padding:24px 10px 20px;text-align:left}
+.eyebrow{border-radius:0;background:#d9e5d7;color:#526c59;font-size:10px;padding:5px 10px;letter-spacing:.13em;transform:rotate(-1deg)}
+h1{margin-top:16px;font-family:"Klee One",sans-serif;font-size:clamp(30px,7vw,43px);letter-spacing:0;font-weight:600}
+.title-accent{color:#a8667e}
+.lead{margin:12px 0 0;font-size:14px;max-width:530px}
+.card{background:#fffdf8;border:1px solid #d8cbbd;border-radius:7px;box-shadow:3px 4px 0 rgba(84,65,51,.08);padding:24px;margin-top:22px;position:relative}
+.card:before{content:"";position:absolute;width:58px;height:13px;background:#e7b9c4b5;top:-7px;left:26px;transform:rotate(-3deg)}
+.card:nth-of-type(2):before{background:#b5d3c1b5;left:auto;right:30px;transform:rotate(3deg)}
+.card h2{font-family:"Klee One",sans-serif;font-size:21px;letter-spacing:0}
+.card h2:before{display:none}
+.hint{font-size:13px}
+.mini-guide{max-width:none;margin:18px 0 0;background:#fffdf9;border:1px dashed #b8a99b;border-radius:4px;padding:0;box-shadow:none;transform:none}
+.mini-guide summary{cursor:pointer;list-style:none;padding:12px 15px;font-family:"Klee One",sans-serif;text-align:left;margin:0}
+.mini-guide summary::-webkit-details-marker{display:none}
+.mini-guide p{padding:0 15px;margin:8px 0 12px;font-size:13px}
+input,select{border:1px solid #d9cdbf;border-radius:5px;background:white;min-height:48px}
+input:focus,select:focus{border-color:#b07d91;outline:2px solid #efd6df}
+button{border-radius:5px;box-shadow:none!important}
+.primary,.input-row button{background:#70594e;color:#fff}
+.primary:hover,.input-row button:hover{background:#59463d}
+.secondary{background:#eee7df;color:#70594e}
+.checkbox-label,.radio-label{border-radius:5px;background:#fff;min-height:46px}
+.checkbox-label:has(input:checked),.radio-label:has(input:checked){background:#f8e9ee;border-color:#c78c9f;color:#644452}
+.checkbox-label input,.radio-label input{accent-color:#ae7085}
+.member-name:before{content:"✳";color:#a56d81}
+.delete-btn{border-radius:4px;background:#fff8f8}
+.payment-list li{border-bottom:1px dashed #cfc2b4}
+.result-card{background:#fffdf9;border:1px solid #c7b8a8}
+.result-card:before{width:80px;background:#b6d3bd;left:50%;transform:translateX(-50%) rotate(-2deg)}
+.result-box{background:#fff;border:0;border-top:2px dashed #b9a99c;border-bottom:2px dashed #b9a99c;border-radius:0;padding:16px 4px;position:relative}
+.result-section-title{font-family:"Klee One",sans-serif;color:#70594e}
+.result-line{background:#f5eee7;border:0;border-radius:3px;font-size:16px;box-shadow:none}
+.breakdown-block{background:#faf7f2;border-radius:3px;border-left:3px solid #d6b0be}
+@media(max-width:520px){.tool-nav{margin-top:12px}.app{width:calc(100% - 28px)}.hero{padding-top:16px}.card{padding:21px 16px}.input-row{grid-template-columns:minmax(0,1fr) auto}.input-row button{width:auto}}
