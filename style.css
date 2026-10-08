@@ -371,3 +371,40 @@ button {
 .mini-guide strong {
   color: var(--text);
 }
+/* 2026 refresh: soft pop, mobile-first */
+:root{--bg:#fcf9ff;--card:#fff;--text:#383044;--muted:#786e83;--line:#e9e1f2;--accent:#a44f95;--accent-light:#f8e7f4;--danger:#ad5171;--shadow:0 8px 28px rgba(94,65,118,.07)}
+body{background:radial-gradient(ellipse at 10% 0%,#fbe1f1 0,transparent 36%),radial-gradient(ellipse at 95% 12%,#e8f7d8 0,transparent 34%),linear-gradient(180deg,#faf5ff,#fffdfc 65%);min-height:100vh}
+.app{width:min(760px,calc(100% - 28px));padding-top:18px}
+.hero{padding:38px 12px 14px}
+.eyebrow{display:inline-block;background:#e8f6d9;color:#556d43;border-radius:100px;padding:6px 15px;font-size:11px;font-weight:800;letter-spacing:.14em}
+h1{font-size:clamp(31px,7vw,49px);letter-spacing:-.035em;font-weight:900}
+.title-accent{color:#ab5ca1}
+.lead{font-size:14px;line-height:1.9}
+.card{border:1px solid #eee5f3;border-radius:25px;background:rgba(255,255,255,.96);box-shadow:var(--shadow);padding:26px;margin-top:18px}
+.card h2{display:flex;align-items:center;gap:9px;font-size:20px;font-weight:900;letter-spacing:-.03em}
+.card h2:before{content:'✦';display:grid;place-items:center;background:#eaf5dc;color:#679653;width:30px;height:30px;border-radius:11px;font-size:17px}
+.card:nth-of-type(2) h2:before{background:#fce4f1;color:#c267a4}
+.result-card h2:before{background:#eee7ff;color:#8b69c5}
+.mini-guide{background:#ffffffa8;box-shadow:none;border:1px dashed #d9c9e8;border-radius:20px;max-width:590px}
+.mini-guide-title{text-align:left;color:#9b5096}
+input,select{border:1.5px solid #e7deee;background:#fff;border-radius:13px;min-height:48px;font-size:16px}
+input:focus,select:focus{outline:3px solid #f5d8ed;border-color:#bd81b4}
+button{min-height:44px;transition:transform .12s,filter .12s}
+button:active{transform:scale(.98)}
+.primary,.input-row button{background:#a85b9e;color:white;box-shadow:0 4px 0 #85477c}
+.primary:hover,.input-row button:hover{filter:brightness(1.05)}
+.secondary{background:#f5eef9;color:#7c658b}
+.checkbox-group{grid-template-columns:repeat(2,minmax(0,1fr))}
+.checkbox-label,.radio-label{border:1.5px solid #ece4f2;border-radius:15px;cursor:pointer;min-height:46px}
+.checkbox-label:has(input:checked),.radio-label:has(input:checked){border-color:#c78fbe;background:#fff0fa;color:#8d467f}
+.checkbox-label input,.radio-label input{accent-color:#a85b9e;min-height:initial}
+.member-list li,.payment-list li{align-items:center;padding:13px 0}
+.member-name{font-weight:800}
+.member-name:before{content:'♥';color:#d88ac1;margin-right:8px}
+.payment-text{font-size:14px;line-height:1.7;overflow-wrap:anywhere}
+.delete-btn{border-radius:10px;background:#fff5f8}
+.result-box{background:#fffdfd;border:1px solid #e9ddeb;border-radius:20px;padding:18px;white-space:normal}
+.result-section-title{color:#a04d95}
+.result-line{font-size:17px;font-weight:800;padding:15px 12px;background:#f9eff8;border-radius:13px;margin:9px 0;border:0;overflow-wrap:anywhere}
+.breakdown-block{background:#f8f7fc;border:0;border-radius:15px}
+@media(max-width:520px){.app{width:calc(100% - 24px)}.hero{padding-top:22px}.card{padding:19px 16px}.input-row{grid-template-columns:minmax(0,1fr) auto}.input-row button{width:auto;padding-inline:20px}.checkbox-group{grid-template-columns:repeat(2,minmax(0,1fr))}.individual-row{grid-template-columns:1fr}.mini-guide{padding:15px}}
