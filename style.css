@@ -451,3 +451,46 @@ button{border-radius:5px;box-shadow:none!important}
 .result-line{background:#f5eee7;border:0;border-radius:3px;font-size:16px;box-shadow:none}
 .breakdown-block{background:#faf7f2;border-radius:3px;border-left:3px solid #d6b0be}
 @media(max-width:520px){.tool-nav{margin-top:12px}.app{width:calc(100% - 28px)}.hero{padding-top:16px}.card{padding:21px 16px}.input-row{grid-template-columns:minmax(0,1fr) auto}.input-row button{width:auto}}
+
+/* Editorial refresh — refined stationery, fewer boxes */
+:root{--ink:#383630;--rose:#b47e85;--sage:#9aab9c;--paper:#fffefa}
+body{background:linear-gradient(180deg,#eee9e0 0,#f6f3ed 330px,#f2eee7 100%);color:var(--ink)}
+.tool-nav{max-width:790px;padding:0 22px;margin-top:22px}
+.tool-nav a{font-family:"Zen Kaku Gothic New",sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;text-decoration:none;border-bottom:1px solid #c8b8ae;padding-bottom:3px}
+.tool-nav span{font-size:9px;letter-spacing:.22em}
+.app{width:min(720px,calc(100% - 36px))}
+.hero{text-align:center;padding:48px 12px 16px}
+.eyebrow{background:transparent;transform:none;border-radius:0;border-bottom:1px solid var(--rose);padding:0 0 7px;color:#92736f;font-size:10px;letter-spacing:.25em}
+h1{margin-top:21px;font-family:"Zen Kaku Gothic New",sans-serif;font-weight:700;font-size:clamp(31px,7vw,43px);letter-spacing:.09em}
+.title-accent{color:var(--ink);position:relative;white-space:nowrap}
+.title-accent:after{content:"";position:absolute;bottom:-5px;left:2px;right:2px;height:5px;background:#eac8cb;z-index:-1;transform:rotate(-1deg)}
+.lead{margin:15px auto 0;max-width:480px;font-size:13px;line-height:2}
+.card{background:var(--paper);border:1px solid #e4ded5;border-radius:3px;box-shadow:0 8px 26px rgba(59,50,45,.045);padding:30px;margin-top:23px}
+.card:before,.card:nth-of-type(2):before,.result-card:before{display:none}
+.card h2{font-family:"Zen Kaku Gothic New",sans-serif;font-size:19px;letter-spacing:.03em;display:flex;align-items:center;gap:10px}
+.card h2:before{display:block;content:"";width:5px;height:19px;border-radius:0;background:#b98290}
+.card:nth-of-type(2) h2:before{background:#a0b5a5}
+.result-card h2:before{background:#a89fbd}
+.hint{color:#8b8179;font-size:12px;line-height:1.9}
+.mini-guide{background:transparent;border:0;border-top:1px solid #d9d0c5;border-bottom:1px solid #d9d0c5;margin:27px auto 0;max-width:530px}
+.mini-guide summary{font-family:"Zen Kaku Gothic New",sans-serif;color:#675d56;font-size:12px;letter-spacing:.07em;padding:14px 6px}
+.mini-guide p{padding:0 6px;font-size:12px}
+label{font-size:12px;letter-spacing:.025em}
+input,select{background:#fff;border:1px solid #ded7cf;border-radius:2px;min-height:50px;padding:12px 14px}
+input:focus,select:focus{outline:2px solid #e7cbd2;border-color:#bc929b}
+button{border-radius:2px;font-size:13px;letter-spacing:.04em}
+.primary,.input-row button{background:#625c55;color:white}
+.primary:hover,.input-row button:hover{background:#49443e}
+.secondary{background:transparent;border:1px solid #d8cec5;color:#75695f}
+.checkbox-label,.radio-label{border-radius:2px;border-color:#e5ded6;background:#fff;font-size:13px}
+.checkbox-label:has(input:checked),.radio-label:has(input:checked){background:#f7eff0;border-color:#c7a4aa;color:#56494a}
+.member-name:before{content:"•";color:#b98290}
+.member-list li,.payment-list li{padding:16px 0}
+.result-card{background:#fffefa;border-color:#ddd5cb}
+.result-box{background:transparent;border:0;border-top:1px solid #c9beb4;border-bottom:1px solid #c9beb4;margin-top:22px;padding:20px 0}
+.result-section-title{font-family:"Zen Kaku Gothic New",sans-serif;font-size:13px;letter-spacing:.12em;color:#75635e}
+.result-line{background:#f5f1eb;border-left:2px solid #b98290;border-radius:0;font-size:17px;font-weight:700;padding:17px}
+.breakdown-block{background:transparent;border:0;border-top:1px dashed #ded7ce;padding:13px 0}
+.breakdown-member{font-size:13px}
+.breakdown-item{font-size:12px;line-height:1.9}
+@media(max-width:520px){.app{width:calc(100% - 28px)}.hero{padding:32px 8px 10px}.card{padding:24px 18px;margin-top:18px}.tool-nav{padding:0 16px}.checkbox-group{gap:7px}.checkbox-label{padding:10px 8px}.lead{font-size:12px}}
