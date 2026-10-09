@@ -73,6 +73,7 @@ function restore(snap) {
 
 /* ---------- 計算 ---------- */
 const yen = (n) => `${Math.round(n).toLocaleString("ja-JP")}円`;
+const escHtml = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 // 全角数字・カンマ・円記号を許容して整数に
 function parseAmount(str) {
@@ -88,14 +89,17 @@ function sharesOf(p) {
   if (p.splitMode === "individual") {
     return p.individualAmounts.map((i) => ({ member: i.member, amount: Math.round(Number(i.amount)) }));
   }
-  const amount = Math.round(Number(p.amount));
-  const n = p.targets.length;
+  const { base, extra } = splitEqual(Math.round(Number(p.amount)), p.targets, p.payer);
+  return p.targets.map((t) => ({ member: t, amount: base + (extra.includes(t) ? 1 : 0) }));
+}
+
+// 均等割り：1人あたりの金額と、端数で1円多くなる人（立て替えた人から順に1円ずつ）
+function splitEqual(amount, targets, payer) {
+  const n = targets.length;
   const base = Math.floor(amount / n);
-  let rem = amount - base * n;
-  // 端数は立て替えた人から順に1円ずつ
-  const order = p.targets.includes(p.payer) ? [p.payer, ...p.targets.filter((t) => t !== p.payer)] : p.targets;
-  const extra = new Set(order.slice(0, rem));
-  return p.targets.map((t) => ({ member: t, amount: base + (extra.has(t) ? 1 : 0) }));
+  const rem = amount - base * n;
+  const order = targets.includes(payer) ? [payer, ...targets.filter((t) => t !== payer)] : targets;
+  return { base, rem, extra: order.slice(0, rem) };
 }
 
 function hasRemainder(p) {
@@ -178,12 +182,17 @@ function addMember(e) {
 }
 
 function removeMember(name) {
+  el.memberError.textContent = "";
+  const paidCount = payments.filter((p) => p.payer === name).length;
+  if (paidCount) {
+    el.memberError.textContent = `${name}が立て替えた支払いが${paidCount}件あります。先にその支払いを削除するか、「修正」で立て替えた人を変えてください。`;
+    return;
+  }
   const snap = snapshot();
   const related = payments.filter((p) => p.payer === name || sharesOf(p).some((s) => s.member === name)).length;
 
   members = members.filter((m) => m !== name);
   payments = payments
-    .filter((p) => p.payer !== name)
     .map((p) => {
       if (p.splitMode === "individual") {
         const individualAmounts = p.individualAmounts.filter((i) => i.member !== name);
@@ -198,7 +207,7 @@ function removeMember(name) {
   syncFormToMembers(false);
   saveData();
   renderAll();
-  showToast(related ? `${name}を削除しました（関係する支払い${related}件も変わりました）` : `${name}を削除しました`, () => restore(snap));
+  showToast(related ? `${name}を削除しました（${name}の分は、残りの人で割り直しました）` : `${name}を削除しました`, () => restore(snap), 8000);
 }
 
 /* ---------- 支払い一覧 ---------- */
@@ -207,7 +216,9 @@ function describePayment(p) {
     return `${p.payer}が立替 ／ ` + p.individualAmounts.map((i) => `${i.member} ${Number(i.amount).toLocaleString("ja-JP")}`).join("・");
   }
   const who = p.targets.length === members.length ? `全員${p.targets.length}人` : p.targets.join("・");
-  return `${p.payer}が立替 ／ ${who}で均等`;
+  const { base, extra } = splitEqual(Math.round(p.amount), p.targets, p.payer);
+  const each = `1人 ${base.toLocaleString("ja-JP")}円` + (extra.length ? `（${extra.join("・")}は+1円）` : "");
+  return `${p.payer}が立替 ／ ${who}で均等 ／ ${each}`;
 }
 
 function renderPayments() {
@@ -223,16 +234,16 @@ function renderPayments() {
   payments.forEach((p, idx) => {
     const li = document.createElement("li");
     li.className = "payment-item" + (idx === editingIndex ? " is-editing" : "");
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "payment-row";
-    btn.setAttribute("aria-label", `${p.name} ${yen(p.amount)} を編集`);
-    btn.innerHTML = `<span class="payment-name"></span><span class="payment-amount"></span><span class="payment-meta"></span>`;
-    btn.querySelector(".payment-name").textContent = p.name;
-    btn.querySelector(".payment-amount").textContent = yen(p.amount);
-    btn.querySelector(".payment-meta").textContent = describePayment(p);
-    btn.addEventListener("click", () => startEdit(idx));
-    li.appendChild(btn);
+    li.innerHTML = `<div class="payment-row"><span class="payment-name"></span><span class="payment-amount"></span><span class="payment-meta"></span></div>
+      <div class="payment-actions"><button type="button" class="mini-btn" data-act="edit">修正</button><button type="button" class="mini-btn danger" data-act="delete">削除</button></div>`;
+    li.querySelector(".payment-name").textContent = p.name;
+    li.querySelector(".payment-amount").textContent = yen(p.amount);
+    li.querySelector(".payment-meta").textContent = describePayment(p);
+    const [editBtn, delBtn] = li.querySelectorAll(".mini-btn");
+    editBtn.setAttribute("aria-label", `${p.name} ${yen(p.amount)} を修正`);
+    delBtn.setAttribute("aria-label", `${p.name} ${yen(p.amount)} を削除`);
+    editBtn.addEventListener("click", () => startEdit(idx));
+    delBtn.addEventListener("click", () => deletePayment(idx));
     el.paymentList.appendChild(li);
   });
 
@@ -240,13 +251,8 @@ function renderPayments() {
     const total = payments.reduce((s, p) => s + Math.round(p.amount), 0);
     const li = document.createElement("li");
     li.className = "payment-total";
-    li.innerHTML = `<span>${payments.length}件・タップで修正</span><strong></strong>`;
+    li.innerHTML = `<span>${payments.length}件</span><strong></strong>`;
     li.querySelector("strong").textContent = `合計 ${yen(total)}`;
-    el.paymentList.appendChild(li);
-  } else if (payments.length === 1) {
-    const li = document.createElement("li");
-    li.className = "payment-total";
-    li.innerHTML = `<span>タップで修正・削除できます</span>`;
     el.paymentList.appendChild(li);
   }
 
@@ -357,10 +363,9 @@ function updateNotes() {
     if (!n) {
       el.equalNote.innerHTML = "割る人を1人以上えらんでください";
     } else if (amount > 0) {
-      const base = Math.floor(amount / n);
-      const rem = amount - base * n;
+      const { base, rem, extra } = splitEqual(amount, members.filter((m) => formTargets.has(m)), formPayer);
       el.equalNote.innerHTML = `${n}人で割って <strong>1人 ${yen(base)}</strong>` +
-        (rem ? `（端数${rem}円は立て替えた人が負担）` : "");
+        (rem ? `（割り切れない${rem}円は、${extra.map(escHtml).join("・")}が1円ずつ多く払います）` : "");
     } else {
       el.equalNote.textContent = `${n}人で割ります`;
     }
@@ -482,14 +487,17 @@ function cancelEdit(render = true) {
   if (render) { renderPayments(); renderForm(); updateSummaryBar(); }
 }
 
-function deleteEditing() {
-  if (editingIndex === null) return;
+function deletePayment(idx) {
   const snap = snapshot();
-  const [removed] = payments.splice(editingIndex, 1);
-  resetForm();
+  const [removed] = payments.splice(idx, 1);
+  if (editingIndex !== null) resetForm();
   saveData();
   renderAll();
-  showToast(`「${removed.name}」を削除しました`, () => restore(snap));
+  showToast(`「${removed.name}」${yen(removed.amount)} を削除しました`, () => restore(snap), 8000);
+}
+function deleteEditing() {
+  if (editingIndex === null) return;
+  deletePayment(editingIndex);
 }
 
 /* ---------- 精算スリップ ---------- */
@@ -587,61 +595,51 @@ function renderResult() {
   rule.className = "slip-rule";
   slip.appendChild(rule);
 
-  // 収支表
+  // ひとりずつの計算
   const tl = document.createElement("p");
   tl.className = "slip-label";
-  tl.textContent = "みんなの収支";
+  tl.textContent = "ひとりずつの計算";
   slip.appendChild(tl);
 
-  const table = document.createElement("table");
-  table.className = "balance-table";
-  table.innerHTML = `<thead><tr><th scope="col">名前</th><th scope="col">立て替え</th><th scope="col">負担</th><th scope="col">差額</th></tr></thead><tbody></tbody>`;
-  const tbody = table.querySelector("tbody");
+  const list = document.createElement("div");
+  list.className = "calc-list";
   members.forEach((m) => {
-    const { paid, owed } = ledger[m];
+    const { paid, owed, items } = ledger[m];
     const diff = paid - owed;
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<th scope="row"></th><td>${paid.toLocaleString("ja-JP")}</td><td>${owed.toLocaleString("ja-JP")}</td><td class="${diff > 0 ? "plus" : diff < 0 ? "minus" : ""}">${diff > 0 ? "+" : diff < 0 ? "−" : "±"}${Math.abs(diff).toLocaleString("ja-JP")}</td>`;
-    tr.querySelector("th").textContent = m;
-    tbody.appendChild(tr);
-  });
-  slip.appendChild(table);
-
-  // 内訳（たたむ）
-  const det = document.createElement("details");
-  det.className = "detail";
-  det.innerHTML = "<summary>ひとりずつの内訳を見る</summary>";
-  members.forEach((m) => {
-    const box = document.createElement("div");
-    box.className = "detail-person";
-    const who = document.createElement("p");
-    who.className = "who";
-    who.innerHTML = "<span></span><span></span>";
-    who.children[0].textContent = m;
-    who.children[1].textContent = `負担 ${yen(ledger[m].owed)}`;
-    box.appendChild(who);
-    if (!ledger[m].items.length) {
+    const box = document.createElement("details");
+    box.className = "calc-person";
+    box.innerHTML = `<summary><span class="calc-name"></span><span class="calc-result ${diff > 0 ? "plus" : diff < 0 ? "minus" : ""}"></span>
+      <span class="calc-formula"></span></summary><div class="calc-items"></div>`;
+    box.querySelector(".calc-name").textContent = m;
+    box.querySelector(".calc-result").textContent = diff > 0 ? `${yen(diff)} 受け取る` : diff < 0 ? `${yen(-diff)} 払う` : "受け渡しなし";
+    box.querySelector(".calc-formula").textContent = `立て替えた ${yen(paid)} − 自分の分 ${yen(owed)}`;
+    const itemsBox = box.querySelector(".calc-items");
+    const addLine = (label, val) => {
       const l = document.createElement("p");
-      l.className = "line";
-      l.textContent = "負担する支払いはありません";
-      box.appendChild(l);
-    }
-    ledger[m].items.forEach((it) => {
-      const l = document.createElement("p");
-      l.className = "line";
       l.innerHTML = "<span></span><span></span>";
-      l.children[0].textContent = it.name;
-      l.children[1].textContent = yen(it.amount);
-      box.appendChild(l);
-    });
-    det.appendChild(box);
+      l.children[0].textContent = label; l.children[1].textContent = val;
+      itemsBox.appendChild(l);
+    };
+    if (!items.length) addLine("自分の分", "なし");
+    items.forEach((it) => addLine(`自分の分：${it.name}`, yen(it.amount)));
+    payments.filter((p) => p.payer === m).forEach((p) => addLine(`立て替え：${p.name}`, yen(p.amount)));
+    list.appendChild(box);
   });
-  slip.appendChild(det);
+  slip.appendChild(list);
+
+  // 検算：立て替えの合計と、みんなの分の合計は必ず同じになる
+  const owedTotal = members.reduce((s, m) => s + ledger[m].owed, 0);
+  const check = document.createElement("p");
+  check.className = "calc-check" + (owedTotal === total ? " ok" : "");
+  check.textContent = owedTotal === total
+    ? `検算 ✓　立て替えの合計 ${yen(total)} ＝ みんなの分の合計 ${yen(owedTotal)}`
+    : `立て替えの合計 ${yen(total)} と、みんなの分の合計 ${yen(owedTotal)} が合っていません`;
+  slip.appendChild(check);
 
   if (payments.some(hasRemainder)) {
     const note = document.createElement("p");
     note.className = "rounding-note";
-    note.textContent = "※ 割り切れない端数は、立て替えた人が1円ずつ多く負担する形にしています。";
+    note.textContent = "※ 割り切れない端数は、立て替えた人から順に1円ずつ多く負担する形にしています（支払いの一覧に「+1円」と出ている人）。";
     slip.appendChild(note);
   }
 }
@@ -656,12 +654,13 @@ function buildCopyText() {
   transfers.forEach((t) => lines.push(`${t.from} → ${t.to}　${yen(t.amount)}${settled[transferKey(t)] ? "（済）" : ""}`));
   lines.push("", "■ 立て替えた支払い");
   payments.forEach((p) => lines.push(`・${p.name} ${yen(p.amount)}（${describePayment(p)}）`));
-  lines.push("", "■ ひとりずつの負担");
+  lines.push("", "■ ひとりずつの計算（立て替えた − 自分の分）");
   members.forEach((m) => {
-    const items = ledger[m].items.map((i) => `${i.name} ${i.amount.toLocaleString("ja-JP")}`).join("・");
-    lines.push(`${m}　${yen(ledger[m].owed)}${items ? `（${items}）` : ""}`);
+    const { paid, owed } = ledger[m];
+    const d = paid - owed;
+    lines.push(`${m}　${yen(paid)} − ${yen(owed)} ＝ ${d > 0 ? `${yen(d)} 受け取る` : d < 0 ? `${yen(-d)} 払う` : "受け渡しなし"}`);
   });
-  if (payments.some(hasRemainder)) lines.push("※端数は立て替えた人が負担");
+  if (payments.some(hasRemainder)) lines.push("※割り切れない端数は、立て替えた人から順に1円ずつ多く負担");
   lines.push("", "確認お願いします！");
   return lines.join("\n");
 }
@@ -758,11 +757,11 @@ function drawReceipt() {
   });
 
   y += 18; dashed(g, L, R, y); y += 62;
-  g.fillStyle = "#6f6458"; g.font = `700 28px ${FONT}`; g.fillText("みんなの収支", L, y);
+  g.fillStyle = "#6f6458"; g.font = `700 28px ${FONT}`; g.fillText("ひとりずつの計算", L, y);
   y += 50;
   const cols = [R - 400, R - 210, R];
   g.font = `400 24px ${FONT}`; g.textAlign = "right";
-  ["立て替え", "負担", "差額"].forEach((h, i) => g.fillText(h, cols[i], y));
+  ["立て替えた", "自分の分", "受取／支払"].forEach((h, i) => g.fillText(h, cols[i], y));
   y += 20;
   members.forEach((m) => {
     const { paid, owed } = ledger[m];
